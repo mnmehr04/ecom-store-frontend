@@ -1,0 +1,236 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { useNavigate } from "react-router";
+export function Cart({ cart, loadCart }) {
+  const [deliveryOption, setDeliveryOption] = useState([]);
+  const [paymentSummary, setPaymentSummary] = useState([]);
+
+  const navigate = useNavigate();
+
+  const createOrder = async () => {
+    await axios.post(
+      "https://e-comm-store-backend-production.up.railway.app/api/orders"
+    );
+    await loadCart();
+    navigate("/orders.html");
+  };
+
+  useEffect(() => {
+    const fetch = async () => {
+      let response = await axios.get(
+        "https://e-comm-store-backend-production.up.railway.app/api/delivery-options?expand=estimatedDeliveryTime"
+      );
+      setDeliveryOption(response.data);
+
+      response = await axios.get(
+        "https://e-comm-store-backend-production.up.railway.app/api/payment-summary"
+      );
+      setPaymentSummary(response.data);
+    };
+
+    fetch();
+  }, [cart]);
+  return (
+    <>
+      <div className="checkout-header">
+        <div className="header-content">
+          <div className="checkout-header-left-section">
+            <a href="index.html">
+              <img className="logo" src="images/logo.png" />
+              <img className="mobile-logo" src="images/mobile-logo.png" />
+            </a>
+          </div>
+
+          <div className="checkout-header-middle-section">
+            Checkout (
+            <a className="return-to-home-link" href="index.html">
+              3 items
+            </a>
+            )
+          </div>
+
+          <div className="checkout-header-right-section">
+            <img src="images/icons/checkout-lock-icon.png" />
+          </div>
+        </div>
+      </div>
+
+      <div className="checkout-page">
+        <div className="page-title">Review your order</div>
+
+        <div className="checkout-grid">
+          <div className="order-summary">
+            {deliveryOption.length > 0 &&
+              cart.map((cartItems) => {
+                const selectedDeliveryoption = deliveryOption.find(
+                  (deliveryoption) => {
+                    return deliveryoption.id === cartItems.deliveryOptionId;
+                  }
+                );
+                const deleteCartItem = async () => {
+                  await axios.delete(
+                    `https://e-comm-store-backend-production.up.railway.app/api/cart-items/${cartItems.productId}`
+                  );
+                  await loadCart();
+                };
+
+                return (
+                  <div key={cartItems.id} className="cart-item-container">
+                    <div className="delivery-date">
+                      Delivery date:{" "}
+                      {dayjs(
+                        selectedDeliveryoption?.estimatedDeliveryTimeMs
+                      ).format("dddd, MMMM D")}
+                    </div>
+
+                    <div className="cart-item-details-grid">
+                      <img
+                        className="product-image"
+                        src={cartItems.product?.image}
+                      />
+
+                      <div className="cart-item-details">
+                        <div className="product-name">
+                          {cartItems.product?.name}
+                        </div>
+                        <div className="product-price">
+                          ${(cartItems.product?.priceCents / 100).toFixed(2)}
+                        </div>
+                        <div className="product-quantity">
+                          <span>
+                            Quantity:{" "}
+                            <span className="quantity-label">
+                              {cartItems.quantity}
+                            </span>
+                          </span>
+                          <span className="update-quantity-link link-primary">
+                            Update
+                          </span>
+                          <span
+                            className="delete-quantity-link link-primary"
+                            onClick={deleteCartItem}
+                          >
+                            Delete
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="delivery-options">
+                        <div className="delivery-options-title">
+                          Choose a delivery option:
+                        </div>
+                        {deliveryOption.map((deliveryOption) => {
+                          let priceString = "FREE Shipping";
+                          if (deliveryOption.priceCents > 0) {
+                            priceString = `$${
+                              deliveryOption.priceCents / 100
+                            } - Shipping`;
+                          }
+
+                          const updateCartDeliveryOption = async () => {
+                            await axios.put(
+                              `https://e-comm-store-backend-production.up.railway.app/api/cart-items/${cartItems.productId}`,
+                              {
+                                deliveryOptionId: deliveryOption.id,
+                              }
+                            );
+                            await loadCart();
+                          };
+
+                          return (
+                            <div
+                              key={deliveryOption.id}
+                              className="delivery-option"
+                              onChange={updateCartDeliveryOption}
+                            >
+                              <input
+                                type="radio"
+                                checked={
+                                  deliveryOption.id ===
+                                  cartItems.deliveryOptionId
+                                }
+                                onChange={() =>
+                                  updateCartDeliveryOption(
+                                    cartItems.id,
+                                    deliveryOption.id
+                                  )
+                                }
+                                className="delivery-option-input"
+                                name={`delivery-option-${cartItems.id}`}
+                              />
+
+                              <div>
+                                <div className="delivery-option-date">
+                                  {dayjs(
+                                    deliveryOption.estimateDeliveryTimeMs
+                                  ).format("dddd, MMMM , D")}
+                                </div>
+                                <div className="delivery-option-price">
+                                  {priceString}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          <div className="payment-summary">
+            <div className="payment-summary-title">Payment Summary</div>
+
+            {paymentSummary && (
+              <>
+                <div className="payment-summary-row">
+                  <div>Items ({paymentSummary.totalItems}):</div>
+                  <div className="payment-summary-money">
+                    ${paymentSummary.productCostCents / 100}
+                  </div>
+                </div>
+
+                <div className="payment-summary-row">
+                  <div>Shipping &amp; handling:</div>
+                  <div className="payment-summary-money">
+                    ${paymentSummary.shippingCostCents / 100}
+                  </div>
+                </div>
+
+                <div className="payment-summary-row subtotal-row">
+                  <div>Total before tax:</div>
+                  <div className="payment-summary-money">
+                    ${paymentSummary.totalCostBeforeTaxCents / 100}
+                  </div>
+                </div>
+
+                <div className="payment-summary-row">
+                  <div>Estimated tax (10%):</div>
+                  <div className="payment-summary-money">
+                    ${paymentSummary.taxCents / 100}
+                  </div>
+                </div>
+
+                <div className="payment-summary-row total-row">
+                  <div>Order total:</div>
+                  <div className="payment-summary-money">
+                    ${paymentSummary.totalCostCents / 100}
+                  </div>
+                </div>
+
+                <button
+                  className="place-order-button button-primary"
+                  onClick={createOrder}
+                >
+                  Place your order
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

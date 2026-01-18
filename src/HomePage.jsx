@@ -24,7 +24,7 @@ export function HomePage({ cart, loadCart }) {
     <>
       <div className="header">
         <div className="left-section">
-          <a href="index.html" className="header-link">
+          <a href="/" className="header-link">
             <img className="logo" src="images/logo-white.png" />
             <img className="mobile-logo" src="images/mobile-logo-white.png" />
           </a>
@@ -39,11 +39,11 @@ export function HomePage({ cart, loadCart }) {
         </div>
 
         <div className="right-section">
-          <a className="orders-link header-link" href="orders.html">
+          <a className="orders-link header-link" href="/orders">
             <span className="orders-text">Orders</span>
           </a>
 
-          <a className="cart-link header-link" href="checkout.html">
+          <a className="cart-link header-link" href="/checkout">
             <img className="cart-icon" src="images/icons/cart-icon.png" />
             <div className="cart-quantity">{totalQuantity}</div>
             <div className="cart-text">Cart</div>

@@ -25,19 +25,11 @@ function App() {
   return (
     //<><HomePage /></>
     <Routes>
-      <Route
-        path="index.html"
-        element={<HomePage cart={cart} loadCart={loadCart} />}
-      />
-      <Route
-        path="/checkout.html"
-        element={<Cart cart={cart} loadCart={loadCart} />}
-      />
-      <Route
-        path="/orders.html"
-        element={<Orders cart={cart} loadCart={loadCart} />}
-      />
-      <Route path="/tracking.html" element={<Tracking />} />
+      <Route path="/" element={<HomePage cart={cart} loadCart={loadCart} />} />
+<Route path="/checkout" element={<Cart cart={cart} loadCart={loadCart} />} />
+<Route path="/orders" element={<Orders cart={cart} loadCart={loadCart} />} />
+<Route path="/tracking" element={<Tracking />} />
+
     </Routes>
   );
 }

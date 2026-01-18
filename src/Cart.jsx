@@ -13,7 +13,7 @@ export function Cart({ cart, loadCart }) {
       "https://e-comm-store-backend-production.up.railway.app/api/orders"
     );
     await loadCart();
-    navigate("/orders.html");
+    navigate("/orders");
   };
 
   useEffect(() => {
